@@ -90,7 +90,7 @@ html.noxmas .xmas,html.noxmas .xmas-t{display:none}
   <div class="note" id="note" hidden></div>
   <div class="places" id="places" hidden><button type="button" data-p="home">Estoy en Casetas</button><button type="button" data-p="Zaragoza">Estoy en Zaragoza</button><button type="button" data-p="Utebo">Estoy en Utebo</button><button type="button" data-p="Alagón">Estoy en Alagón</button></div>
   <div class="actions"><button class="primary" id="locate" type="button">Dónde estoy / Actualizar</button><a class="btn ghost" id="maps" target="_blank" rel="noopener">Ruta en Google Maps</a></div>
-  <div class="duo"><a class="btn ghost" id="adif" href="https://www.adif.es/" target="_blank" rel="noopener" hidden>Retrasos en Adif</a><a class="btn ghost" id="call" href="tel:+34912320320" hidden>Llamar a Renfe <span class="nw">912 320 320</span></a></div>
+  <div class="duo"><a class="btn ghost" id="adif" href="https://www.adif.es/" target="_blank" rel="noopener" hidden>Retrasos en Adif</a><a class="btn ghost" id="call" href="tel:+34912320320" hidden>Información de Renfe <span class="nw">912 320 320</span></a></div>
   <div class="install" id="install" hidden>
     <div class="inst-row"><strong>Tenla siempre a mano</strong><button class="inst-x" id="instX" type="button" aria-label="Cerrar">×</button></div>
     <p id="instT"></p>
@@ -255,7 +255,7 @@ function render(){const n=madrid(),now=n.hour*60+n.minute,today=new Date(Date.UT
   const b=$("locate");b.textContent=S.loc==="loading"?"Buscando…":"Dónde estoy / Actualizar";b.disabled=S.loc==="loading";
   const st=h?h.p.stop:o.pl[0];
   if(st)$("maps").href="https://www.google.com/maps/dir/?api=1"+(S.pos?`&origin=${S.pos.lat},${S.pos.lng}`:"")+`&destination=${st.lat},${st.lng}&travelmode=walking`;
-  $("adif").hidden=!(h&&h.mode==="train")&&!ALERTS.some(x=>x.date<=k&&k<=(x.until||x.date));$("call").hidden=$("adif").hidden;
+  $("adif").hidden=false;$("call").hidden=false;
   // Next 6 departures, but always show the next 2 of each kind (buses run every 10 min and would hide the trains).
   const st0=Math.max(i,0),pick=fut.slice(st0,st0+6);
   for(const md of["train","bus"])if(!pick.some(x=>x.mode===md))pick.push(...fut.slice(st0).filter(x=>x.mode===md).slice(0,2));
