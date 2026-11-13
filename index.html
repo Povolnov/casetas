@@ -285,7 +285,7 @@ function locate(){if(!navigator.geolocation){S.loc="denied";render();return}
   try{navigator.geolocation.getCurrentPosition(onPos,e=>{if(e.code===1)return fail(e);
     navigator.geolocation.getCurrentPosition(onPos,fail,{enableHighAccuracy:false,timeout:15000,maximumAge:600000})},{enableHighAccuracy:true,timeout:8000,maximumAge:60000})}catch(e){fail()}}
 const openMode=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone?"app":"web";
-const LOG_URL="";function deviceId(){let id=store.get("device");if(!id&&crypto.randomUUID){id=crypto.randomUUID();store.set("device",id)}return id||""}
+const LOG_URL="https://autobus-visits.povolnov.workers.dev/";function deviceId(){let id=store.get("device");if(!id&&crypto.randomUUID){id=crypto.randomUUID();store.set("device",id)}return id||""}
 if(LOG_URL)fetch(LOG_URL+"?app=casetas&mode="+openMode,{method:"POST",mode:"cors",keepalive:true,headers:{"Content-Type":"text/plain"},body:deviceId()}).catch(()=>{});
 $("locate").onclick=locate;
 for(const b of [$("dirW"),$("dirE")])b.onclick=()=>{S.dir=b.dataset.d;store.set("dir",S.dir);render()};
