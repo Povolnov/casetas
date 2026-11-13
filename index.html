@@ -256,7 +256,11 @@ function render(){const n=madrid(),now=n.hour*60+n.minute,today=new Date(Date.UT
   const st=h?h.p.stop:o.pl[0];
   if(st)$("maps").href="https://www.google.com/maps/dir/?api=1"+(S.pos?`&origin=${S.pos.lat},${S.pos.lng}`:"")+`&destination=${st.lat},${st.lng}&travelmode=walking`;
   $("adif").hidden=!(h&&h.mode==="train")&&!ALERTS.some(x=>x.date<=k&&k<=(x.until||x.date));$("call").hidden=$("adif").hidden;
-  $("list").innerHTML=fut.slice(Math.max(i,0),Math.max(i,0)+6).map((x,j)=>`<li${j===0?' class="cur"':""}><b>${fmt(x.p.dep)}</b><span class="stop">${x.p.stop.s}</span><span class="ln">${x.line}</span><span class="r">${x.tag?x.tag+", ":""}${arrText(x)}</span></li>`).join("");
+  // Next 6 departures, but always show the next 2 of each kind (buses run every 10 min and would hide the trains).
+  const st0=Math.max(i,0),pick=fut.slice(st0,st0+6);
+  for(const md of["train","bus"])if(!pick.some(x=>x.mode===md))pick.push(...fut.slice(st0).filter(x=>x.mode===md).slice(0,2));
+  pick.sort((a,b)=>a.p.dep-b.p.dep);
+  $("list").innerHTML=pick.map((x,j)=>`<li${j===0?' class="cur"':""}><b>${fmt(x.p.dep)}</b><span class="stop">${x.p.stop.s}</span><span class="ln">${x.line}</span><span class="r">${x.tag?x.tag+", ":""}${arrText(x)}</span></li>`).join("");
   const bd=busDay(today);$("dayt").textContent="Bus hoy: "+(bd==="lab"?"lunes a viernes":bd==="sab"?"sábado":"domingos y festivos");
   $("margin").value=String(S.margin);
   showTemp(o);loadTemp(o);
