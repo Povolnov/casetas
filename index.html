@@ -95,6 +95,7 @@ html.noxmas .xmas,html.noxmas .xmas-t{display:none}
     <div class="inst-row"><strong>Tenla siempre a mano</strong><button class="inst-x" id="instX" type="button" aria-label="Cerrar">×</button></div>
     <p id="instT"></p>
     <button class="primary" id="instB" type="button" hidden>Instalar la app</button>
+    <a class="btn ghost" id="instC" href="#" hidden>Abrir en Chrome</a>
   </div>
   <h2>Próximos trenes y autobuses</h2>
   <ul id="list"></ul>
@@ -300,12 +301,12 @@ async function loadJSON(u){try{const r=await fetch(u,{cache:"no-cache"});if(r.ok
 render();setInterval(render,20000);locate();
 if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{})}
 let installEvent=null;
-function setupInstall(){const box=$("install"),text=$("instT"),btn=$("instB"),ua=navigator.userAgent;
+function setupInstall(){const box=$("install"),text=$("instT"),btn=$("instB"),chrome=$("instC"),ua=navigator.userAgent;chrome.hidden=true;
   if(openMode==="app"||store.get("installHidden")){box.hidden=true;return}
   const ios=/iphone|ipad|ipod/i.test(ua),android=/android/i.test(ua),chromeLike=/chrome|crios|samsungbrowser/i.test(ua)&&!/; wv\)/i.test(ua);
   if(installEvent){text.textContent="Instálala y ábrela con un toque desde la pantalla de inicio.";btn.hidden=false;box.hidden=false}
-  else if(ios){text.textContent=/crios|fxios/i.test(ua)?"Ábrela en Safari, pulsa Compartir y después «Añadir a pantalla de inicio».":"Pulsa Compartir y después «Añadir a pantalla de inicio».";btn.hidden=true;box.hidden=false}
-  else if(android){text.textContent=chromeLike?"Pulsa los tres puntos (⋮), arriba a la derecha, y después «Instalar aplicación».":"Ábrela en Chrome, pulsa los tres puntos (⋮) y después «Instalar aplicación».";btn.hidden=true;box.hidden=false}
+  else if(ios){text.textContent=/crios|fxios/i.test(ua)?"Ábrela en Safari, pulsa Compartir y después «Añadir a pantalla de inicio».":"Pulsa Compartir y después «Añadir a pantalla de inicio». ¿La abriste desde WhatsApp? Toca primero «Abrir en Safari» (el icono de la brújula).";btn.hidden=true;box.hidden=false}
+  else if(android){text.textContent=chromeLike?"Pulsa los tres puntos (⋮), arriba a la derecha, y después «Instalar aplicación». ¿No ves los tres puntos? Pasa si la abres desde WhatsApp: toca «Abrir en Chrome».":"Ábrela en Chrome, pulsa los tres puntos (⋮) y después «Instalar aplicación».";btn.hidden=true;chrome.href="intent://"+location.host+location.pathname+"#Intent;scheme=https;package=com.android.chrome;end";chrome.hidden=false;box.hidden=false}
   else box.hidden=true}
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvent=e;setupInstall()});
 window.addEventListener("appinstalled",()=>{store.set("installHidden","1");$("install").hidden=true});
