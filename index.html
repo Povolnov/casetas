@@ -1,0 +1,313 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0f3d3e"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><style>*{box-sizing:border-box}:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Bus y tren Casetas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Golos+Text:wght@400;500;600;800&display=swap">
+<style>
+/* Layout: one phone column; a departure board on top, the next trains and buses below it */
+:root{--bg:#e9efec;--strong:#000;--surface:#fff;--fg:#14282a;--muted:#55686a;--line:#cbd7d3;--board:#0f3d3e;--board-fg:#f3f7f4;--board-muted:#a9c4bf;--amber:#ffc247;--accent:#0b6b62;--warn:#8f4a00;--warn-bg:#fdf0dc;
+--display:"Oswald","Arial Narrow",Impact,sans-serif;--body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1718;--strong:#fff;--surface:#172426;--fg:#e8f0ee;--muted:#9db0ad;--line:#2b3c3e;--board:#123f40;--accent:#5fd0c2;--warn:#ffc98a;--warn-bg:#35270f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1718;--strong:#fff;--surface:#172426;--fg:#e8f0ee;--muted:#9db0ad;--line:#2b3c3e;--board:#123f40;--accent:#5fd0c2;--warn:#ffc98a;--warn-bg:#35270f;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:400 1rem/1.45 var(--body);padding-block:16px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:30rem;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+button,a.btn{font:inherit;cursor:pointer;border-radius:10px;min-height:48px;display:flex;align-items:center;justify-content:center;text-decoration:none;padding:8px 14px;text-align:center}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.route{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+.route h1{flex:1;min-width:0;text-align:left;margin:0;font:600 clamp(1.05rem,5vw,1.4rem)/1.15 var(--display);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.logo{display:flex;align-items:center;gap:7px;height:34px}.logo .flag{width:36px;height:24px;border:1px solid var(--line);border-radius:2px;display:block}.logo .word{font:700 1.45rem/1 var(--display);letter-spacing:.01em;color:var(--fg)}
+.gift{margin:6px 0 0;font-weight:500;text-wrap:balance}
+.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--muted);font-size:.9rem}
+.ver{flex:none;white-space:nowrap;font-size:clamp(.72rem,3.5vw,.9rem)}
+.upd{flex:1;min-width:0;text-align:center}
+.install{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.install p{margin:0;font-size:.95rem}
+.inst-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.inst-x{min-height:36px;width:36px;padding:0;background:none;border:0;color:var(--muted);font-size:1.4rem;line-height:1}
+.info-btn{width:44px;min-height:44px;padding:0;flex:none;border-radius:50%;background:var(--surface);color:var(--accent);border:1px solid var(--line);font:600 1.15rem/1 Georgia,serif}
+.copy{white-space:nowrap;font-size:clamp(.68rem,3.5vw,.95rem)}
+.info{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.95rem}
+.info h2{margin:12px 0 4px}.info h2:first-child{margin-top:0}.info p{margin:0 0 8px}.info a{color:var(--accent)}
+.swap{flex:none;white-space:nowrap;padding:8px;font-size:.9rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);font-weight:500}
+.board{background:var(--board);color:var(--board-fg);border-radius:14px;padding:16px 18px 18px;display:flex;flex-direction:column;gap:4px}
+.lab{font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--board-muted)}
+.toprow{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.temp{flex:none;font:500 1.15rem/1.1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.timerow{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.time{font:600 clamp(3.8rem,20vw,6rem)/1 var(--display);color:var(--amber);font-variant-numeric:tabular-nums}
+.meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-bottom:0;font-size:.92rem;min-width:0;text-align:right}
+.chip{font:600 1.6rem/1.05 var(--display);border:2px solid var(--board-muted);border-radius:8px;padding:6px 10px;text-align:center}
+.go{font:500 1.5rem/1.2 var(--display);margin-top:6px}
+.detail{color:var(--board-muted);font-size:.95rem}
+.run{color:var(--amber);font-size:.92rem;margin-top:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.primary{background:var(--accent);color:var(--bg);border:0;font-weight:600}
+.btn.ghost{background:var(--surface);color:var(--fg);border:1px solid var(--line);font-weight:500}
+.note{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:.92rem}
+.places{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.places button{background:var(--surface);color:var(--fg);border:1px solid var(--line);font-weight:500}
+.places button.on{background:var(--board);border-color:var(--board);color:#ffc247}
+h2{margin:6px 0 0;font:500 1.1rem/1.2 var(--display);letter-spacing:.02em}
+ul{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+li{display:grid;grid-template-columns:3.4rem minmax(0,1fr) auto;gap:6px;align-items:baseline;padding:10px 14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+li:first-child{border-top:0}
+ul{overflow:hidden}
+li.cur,li.cur .r{color:var(--strong)}
+li.cur .stop,li.cur .ln,li.cur .r{font-weight:800}
+li.cur b{font-weight:700}
+li:not(.cur){opacity:.72}
+li .stop{font-weight:500;min-width:0}
+li .ln{white-space:nowrap;text-align:right}
+li .r{grid-column:2/-1;text-align:left}
+li .st{grid-column:2/-1;color:var(--muted);font-size:.84rem}
+li b{font:500 1.25rem/1 var(--display)}
+li span{min-width:0}
+li .r{text-align:right;color:var(--muted);font-size:.9rem}
+.status{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;color:var(--muted);font-size:.9rem}
+.status label{display:flex;gap:6px;align-items:center}
+select{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px}
+.link{background:none;border:0;color:var(--accent);min-height:36px;padding:4px 0;text-decoration:underline}
+.brand{position:relative}
+.xmas{position:absolute;pointer-events:none}
+.hat{width:22px;left:-9px;top:-6px;transform:rotate(-14deg)}
+.star{width:14px;right:-12px;left:auto;top:-8px;animation:tw 2.4s ease-in-out infinite}
+@keyframes tw{50%{transform:scale(1.25) rotate(15deg);filter:drop-shadow(0 0 3px #ffc247)}}
+@media (prefers-reduced-motion:reduce){.star{animation:none}}
+html.noxmas .xmas,html.noxmas .xmas-t{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dir{min-width:0;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:600 1.02rem/1.1 var(--display);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.dir.on{background:var(--board);border-color:var(--board);color:#ffc247;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.dir:disabled{cursor:default;opacity:1}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.duo>.btn{margin:0;padding-inline:8px;font-size:.92rem;line-height:1.2}.duo:not(:has(>a:not([hidden]))){display:none}.nw{white-space:nowrap;display:block}.duo>.btn{flex-direction:column;align-items:center;justify-content:center;text-align:center}
+</style>
+<main>
+  <h1 class="sr" id="route"></h1>
+  <div class="route"><button class="dir" id="dirW" type="button" data-d="w"></button><div class="brand"><div class="logo"><img class="flag" src="flag.png" alt="" width="36" height="24"><span class="word">Casetas</span></div><svg class="xmas hat" viewBox="0 0 40 30" aria-hidden="true"><path d="M5 23C9 12 17 3 29 4c4 0 7 3 7 8l-3 1c-1-3-3-4-6-4-6 1-10 7-13 15z" fill="#d62828"/><rect x="2" y="21" width="20" height="7" rx="3.5" fill="#fff" stroke="#e0e0e0"/><circle cx="34" cy="14" r="4.5" fill="#fff" stroke="#e0e0e0"/></svg><svg class="xmas star" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l2.6 5.6 6.1.7-4.5 4.2 1.2 6L10 14.5 4.6 17.5l1.2-6L1.3 7.3l6.1-.7z" fill="#ffc247" stroke="#c98a00" stroke-width=".8"/></svg></div><button class="dir" id="dirE" type="button" data-d="e"></button></div>
+  <section class="board" aria-live="polite">
+    <div class="toprow"><div class="lab" id="heroLab"></div><div class="temp" id="temp" hidden></div></div>
+    <div class="timerow"><div class="time" id="time"></div><div class="meta"><span class="chip" id="line"></span><span id="arr"></span></div></div>
+    <div class="go" id="go"></div>
+    <div class="detail" id="detail"></div>
+    <div class="run" id="run" hidden></div>
+  </section>
+  <div class="note" id="note" hidden></div>
+  <div class="places" id="places" hidden><button type="button" data-p="home">Estoy en Casetas</button><button type="button" data-p="Zaragoza">Estoy en Zaragoza</button><button type="button" data-p="Utebo">Estoy en Utebo</button><button type="button" data-p="Alagón">Estoy en Alagón</button></div>
+  <div class="actions"><button class="primary" id="locate" type="button">Dónde estoy / Actualizar</button><a class="btn ghost" id="maps" target="_blank" rel="noopener">Ruta en Google Maps</a></div>
+  <div class="duo"><a class="btn ghost" id="adif" href="https://www.adif.es/" target="_blank" rel="noopener" hidden>Retrasos en Adif</a><a class="btn ghost" id="call" href="tel:+34912320320" hidden>Llamar a Renfe <span class="nw">912 320 320</span></a></div>
+  <div class="install" id="install" hidden>
+    <div class="inst-row"><strong>Tenla siempre a mano</strong><button class="inst-x" id="instX" type="button" aria-label="Cerrar">×</button></div>
+    <p id="instT"></p>
+    <button class="primary" id="instB" type="button" hidden>Instalar la app</button>
+  </div>
+  <h2>Próximos trenes y autobuses</h2>
+  <ul id="list"></ul>
+  <div class="status"><span id="dayt"></span>
+    <label for="margin">Margen<select id="margin"><option value="0">0 min</option><option value="2">2 min</option><option value="5">5 min</option><option value="10">10 min</option></select></label></div>
+  <p class="gift"><strong>La app de Casetas para ir a Zaragoza… ¡y volver! Desde cualquier estación o parada.</strong><br><span class="xmas-t">🎄 </span>Un regalo de Navidad para los vecinos de Casetas, hecho con cariño por vecinos de Alagón.</p>
+  <div class="foot"><span class="ver">v. 1.0</span><span class="ver upd" id="updated"></span><button class="info-btn" id="infoBtn" type="button" aria-expanded="false" aria-controls="info" aria-label="Información">i</button></div>
+  <section class="info" id="info" hidden>
+    <h2>Cómo funciona</h2>
+    <p>Al abrirla, mira dónde estás y busca la estación o la parada más cercana de toda la línea, de Zaragoza a Alagón. En Casetas te enseña los trenes y autobuses hacia Zaragoza o los trenes hacia Alagón. Si estás fuera, te dice cómo volver a Casetas. Calcula el tiempo a pie y te dice cuál puedes coger y cuándo tienes que salir.</p>
+    <h2>Horarios</h2>
+    <p><span id="trainInfo">Trenes: Renfe.</span> Se actualizan solos cada noche: Cercanías C1 y trenes regionales.</p>
+    <p>Autobuses: líneas 603 y 613 del CTAZ, horario desde el 1 de junio de 2026. Las horas en las paradas intermedias son aproximadas (~): solo las de las cabeceras son oficiales.</p>
+    <p>La app se actualiza sola al abrirla con conexión. Si sigues viendo el horario antiguo, vuelve a instalarla.</p>
+    <h2>Preguntas, ideas y críticas</h2>
+    <p>WhatsApp: <a href="https://wa.me/34633816232" target="_blank" rel="noopener">633 816 232</a><br>Correo: <a href="mailto:andres@idaa.uk">andres@idaa.uk</a></p>
+    <h2>Aviso</h2>
+    <p>Aplicación no oficial, sin vínculo con CTAZ, Renfe, Adif ni el Ayuntamiento de Zaragoza. Comprueba los horarios antes de viajar.</p>
+    <h2>Privacidad</h2>
+    <p>Para contar visitas y usuarios guardamos la fecha, la dirección IP, el país, la ciudad aproximada, un identificador anónimo creado en tu teléfono, el tipo de dispositivo (Android, iPhone u ordenador) y si la abres como aplicación o en el navegador, durante 90 días. Para consultarlos o borrarlos, escribe a andres@idaa.uk.</p>
+    <p>Tu ubicación no se guarda. Se usa en el teléfono y se envía a OpenStreetMap solo para calcular el tiempo a pie.</p>
+    <p>La temperatura se consulta en Open-Meteo con las coordenadas del barrio, no con las tuyas.</p>
+    <h2>Créditos</h2>
+    <p>Horarios de tren: <a href="https://data.renfe.com/" target="_blank" rel="noopener">Renfe Data</a>, CC BY 4.0.<br>Autobuses: <a href="https://www.ctaz.es/" target="_blank" rel="noopener">CTAZ</a>. Paradas: © colaboradores de OpenStreetMap (ODbL).<br>Temperatura: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>, CC BY 4.0.<br>Bandera de Zaragoza: Ebrenc, <a href="https://commons.wikimedia.org/wiki/File:Bandera_de_Zaragoza.svg" target="_blank" rel="noopener">Wikimedia Commons</a>, CC BY-SA 2.5.</p>
+    <p class="copy">© International Digital Asset Association (IDAA)</p>
+  </section>
+</main>
+<script>
+// Bus 603/613 Zaragoza – Casetas (CTAZ, horario desde el 1 de junio de 2026). Times at the terminals;
+// stops in between use estimated offsets (minutes after the terminal).
+const BUS_PLACES={
+ "Pº María Agustín, 2-4":{s:"Pº María Agustín",town:"Zaragoza",lat:41.650372,lng:-0.888623},
+ "Pza. del Portillo, 3":{s:"Pza. del Portillo",town:"Zaragoza",lat:41.655518,lng:-0.892104},
+ "Av. Navarra, 12":{s:"Av. Navarra, 12",town:"Zaragoza",lat:41.654839,lng:-0.901799},
+ "Av. Navarra, 54":{s:"Av. Navarra, 54 (Delicias)",town:"Zaragoza",lat:41.65556,lng:-0.906757},
+ "Enlace Utebo (ida)":{s:"Enlace Utebo",town:"Utebo",lat:41.701567,lng:-0.999416},
+ "Ctra. Logroño, 74":{s:"Ctra. Logroño, 74",town:"Casetas",lat:41.719729,lng:-1.029848,home:1},
+ "Urb. Alameda":{s:"Urb. Alameda",town:"Casetas",lat:41.723254,lng:-1.034386,home:1},
+ "Pza. Joaquín Costa":{s:"Pza. Joaquín Costa",town:"Casetas",lat:41.72111,lng:-1.028491,home:1},
+ "Ctra. Logroño, 7":{s:"Ctra. Logroño, 7",town:"Casetas",lat:41.718004,lng:-1.026663,home:1},
+ "Enlace Utebo (vuelta)":{s:"Enlace Utebo",town:"Utebo",lat:41.701556,lng:-0.999603},
+ "Av. Navarra, 71":{s:"Av. Navarra, 71 (Delicias)",town:"Zaragoza",lat:41.655361,lng:-0.907355},
+ "Pº María Agustín, 37":{s:"Pº María Agustín, 37",town:"Zaragoza",lat:41.651387,lng:-0.890974}};
+// [stop, minutes after the terminal departure]
+const ROUTE_C=[["Pº María Agustín, 2-4",0],["Pza. del Portillo, 3",2],["Av. Navarra, 12",4],["Av. Navarra, 54",6],["Enlace Utebo (ida)",24],["Ctra. Logroño, 74",36],["Urb. Alameda",40]];
+const ROUTE_Z=[["Urb. Alameda",0],["Pza. Joaquín Costa",2],["Ctra. Logroño, 7",5],["Enlace Utebo (vuelta)",12],["Av. Navarra, 71",32],["Pº María Agustín, 37",38],["Pº María Agustín, 2-4",40]];
+// Departures from the terminal. "*" = every 10 min (or 30 on Sundays) between its neighbours; "m" = line 613.
+const BUS={lab:{c:["5:00","5:10","5:20","5:30","5:40","5:50m","6:00","*","7:10","7:30","*","8:40","8:50m","9:00","*","10:10","10:30","*","11:40","11:50m","12:00","*","13:10","13:30","*","14:40","14:50m","15:00","*","16:10","16:30","*","17:40","17:50m","18:00","*","19:10","19:30","*","20:40","20:50m","21:00","*","22:10","22:30m","22:40","22:50","23:00"],
+  z:["5:45","5:55","6:05","6:15","6:25","6:45","6:50m","*","7:55","8:15","*","9:25","9:45","9:50m","*","10:55","11:15","*","12:25","12:45","12:50m","*","13:55","14:15","*","15:25","15:45","15:50m","*","16:55","17:15","*","18:25","18:45","18:50m","*","19:55","20:15","*","21:25","21:45","21:50m","*","22:55","23:25","23:30m","23:35","23:45"],step:10},
+ sab:{c:["6:00","*","7:20","7:30m","7:40","*","8:50","9:10","*","13:20","13:30m","13:40","*","14:50","15:10","*","19:20","19:30m","19:40","*","20:50","21:10","*","23:30"],
+  z:["6:45","*","8:05","8:30m","8:25","*","9:35","9:55","*","14:05","14:30m","14:25","*","15:35","15:55","*","20:05","20:30m","20:25","*","21:35","21:55","*","24:15"],step:10},
+ dom:{c:["7:00","7:30m","8:00","*","8:30","9:10","*","13:10","13:40m","14:10","*","14:40","15:20","*","19:20","19:50m","20:20","*","20:50","21:30","22:00","22:30","23:00"],
+  z:["7:45","8:25m","8:45","*","9:15","9:55","*","13:55","14:35m","14:55","*","15:25","16:05","*","20:05","20:45m","21:05","*","21:35","22:15","22:45","23:15","23:45"],step:30}};
+// Trains: replaced at load by trains.json (Renfe Data, updated every night).
+let TRAIN={updated:"",base:"",days:0,stations:{},trains:[]};
+const SHORT={"Zaragoza Delicias":"Delicias","Zaragoza-Portillo":"Portillo","Zaragoza-Goya":"Goya","Zaragoza-Miraflores":"Miraflores","Casetas":"Estación de Casetas","Utebo":"Estación de Utebo","Alagón":"Estación de Alagón"};
+const TOWN={"Zaragoza Delicias":"Zaragoza","Zaragoza-Portillo":"Zaragoza","Zaragoza-Goya":"Zaragoza","Zaragoza-Miraflores":"Zaragoza","Tudela de Navarra":"Tudela","Ricla-La Almunia":"La Almunia","Rueda de Jalón-Lumpiaque":"Rueda de Jalón","Paracuellos-Sabiñán":"Paracuellos"};
+const ZGZ=["Zaragoza Delicias","Zaragoza-Portillo","Zaragoza-Goya","Zaragoza-Miraflores"];
+const HOME_ST="Casetas",HOME={lat:41.7207,lng:-1.0275},FAR_M=3500,HOME_M=1800;
+{const n=new Date(),k=n.getMonth()*100+n.getDate();if(!(k>=1001||k<=6))document.documentElement.classList.add("noxmas")}
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem("cas_"+k)}catch(e){return null}},set(k,v){try{localStorage.setItem("cas_"+k,v)}catch(e){}}};
+const S={dir:store.get("dir")==="w"?"w":"e",pos:null,loc:"idle",manual:null,walk:{},margin:+(store.get("margin")??2)};
+let ALERTS=[];
+
+function madrid(){const p={};new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Madrid",year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date()).forEach(x=>p[x.type]=+x.value);return p}
+function easter(y){const a=y%19,b=y>>>0,c=Math.floor(b/100),e=b%100,d=Math.floor(c/4),f=c%4,g=Math.floor((c+8)/25),h=Math.floor((c-g+1)/3),i=(19*a+c-d-h+15)%30,k=Math.floor(e/4),l=e%4,m=(32+2*f+2*k-i-l)%7,n=Math.floor((a+11*i+22*m)/451),mo=Math.floor((i+2*m-7*n+114)/31),da=((i+2*m-7*n+114)%31)+1;return Date.UTC(y,mo-1,da)}
+const iso=d=>d.toISOString().slice(0,10);
+const md=d=>iso(d).slice(5);
+// Festivos en Zaragoza: nacionales, de Aragón y locales (San Valero, Cincomarzada).
+const FIXED=["01-01","01-06","01-29","03-05","04-23","05-01","08-15","10-12","11-01","12-06","12-08","12-25"];
+function isHoliday(d){const t=d.getTime(),e=easter(d.getUTCFullYear()),DAY=864e5;
+  if(t===e-3*DAY||t===e-2*DAY)return true;
+  if(FIXED.includes(md(d)))return true;
+  return d.getUTCDay()===1&&FIXED.includes(md(new Date(t-DAY)))}
+function busDay(d){const w=d.getUTCDay();return w===0||isHoliday(d)?"dom":w===6?"sab":"lab"}
+const toMin=s=>{const[a,b]=s.replace("m","").split(":");return +a*60+ +b};
+const fmt=m=>{m=((m%1440)+1440)%1440;return Math.floor(m/60)+":"+String(m%60).padStart(2,"0")};
+const dur=m=>m<60?m+" min":Math.floor(m/60)+" h"+(m%60?" "+(m%60)+" min":"");
+function dist(a,b){const R=6371e3,r=Math.PI/180,x=(b.lat-a.lat)*r,y=(b.lng-a.lng)*r,h=Math.sin(x/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(y/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+// Expand the "*" rows of a timetable into departures: [{t, line}]
+function expand(list,step){const out=[];let last=null;
+  list.forEach((x,i)=>{if(x==="*"){const next=list.slice(i+1).find(y=>y!=="*"&&!y.endsWith("m"));if(last==null||!next)return;
+      for(let t=last+step;t<toMin(next);t+=step)out.push({t,line:"Bus 603"});return}
+    const t=toMin(x);out.push({t,line:x.endsWith("m")?"Bus 613":"Bus 603"});if(!x.endsWith("m"))last=t});
+  return out}
+
+// All boarding places: train stations and bus stops.
+function places(){const out=[];
+  for(const[k,[lat,lng]]of Object.entries(TRAIN.stations))out.push({k:"t:"+k,name:k,s:SHORT[k]||k,town:TOWN[k]||k,lat,lng,mode:"train",home:k===HOME_ST});
+  for(const[k,p]of Object.entries(BUS_PLACES))out.push({k:"b:"+k,name:k,mode:"bus",...p,home:!!p.home});
+  return out}
+const homePlaces=()=>places().filter(p=>p.home);
+function origin(){
+  if(S.manual){const all=places();if(S.manual==="home")return{home:true,pl:homePlaces()};
+    const pl=all.filter(x=>x.town===S.manual);return{home:false,pl,near:pl[0]}}
+  if(!S.pos)return{home:true,pl:homePlaces()};
+  const all=places().map(p=>({...p,d:dist(S.pos,p)})).sort((a,b)=>a.d-b.d);
+  if(dist(S.pos,HOME)<=HOME_M||all.filter(p=>p.home).some(p=>p.d<=600))return{home:true,pl:homePlaces()};
+  const near=all[0];if(near.d>30000)return{home:true,pl:homePlaces(),away:true};
+  const pl=all.filter(p=>p.d<=FAR_M&&!p.home);return{home:false,pl:pl.length?pl:all.filter(p=>p.town===near.town),near,far:near.d>FAR_M}}
+
+// Services running on a day (offset `add` days from today), as stop sequences in minutes.
+function services(today,add){const d=new Date(today.getTime()+add*864e5),out=[],base=add*1440;
+  const tag=add===0?"":add===1?"mañana":new Intl.DateTimeFormat("es",{weekday:"long",timeZone:"UTC"}).format(d);
+  if(TRAIN.base){const[y,m,dd]=TRAIN.base.split("-").map(Number),i=Math.round((d.getTime()-Date.UTC(y,m-1,dd))/864e5);
+    if(i>=0)for(const t of TRAIN.trains)if(t.m[i]==="1")out.push({mode:"train",line:t.l==="C1"?"Cercanías C1":"Regional "+t.n,tag,seq:t.s.map(([st,h])=>({k:"t:"+st,name:st,t:toMin(h)+base}))})}
+  const p=BUS[busDay(d)];
+  for(const[dir,route]of[["c",ROUTE_C],["z",ROUTE_Z]])for(const x of expand(p[dir],p.step))
+    out.push({mode:"bus",line:x.line,tag,seq:route.map(([st,off])=>({k:"b:"+st,name:st,t:x.t+off+base}))});
+  return out}
+const isZgz=x=>x.k.startsWith("t:Zaragoza")||(x.k[0]==="b"&&BUS_PLACES[x.k.slice(2)]?.town==="Zaragoza");
+// Where a trip ends for the reader: Casetas when coming home, else Zaragoza or the west.
+function target(sv,from,o){const rest=sv.seq.slice(from+1);
+  if(!o.home)return rest.find(x=>x.k==="t:"+HOME_ST||(x.k[0]==="b"&&BUS_PLACES[x.k.slice(2)]?.home));
+  if(S.dir==="e"){if(!rest.some(isZgz))return null;
+    return rest.find(x=>x.k==="t:Zaragoza Delicias")||rest.find(x=>x.k==="t:Zaragoza-Portillo")||rest.find(x=>x.k==="b:Av. Navarra, 71")||rest.find(isZgz)}
+  if(sv.mode!=="train"||!rest.length||rest.some(isZgz)||rest[0].k==="t:Utebo")return null;
+  return rest.find(x=>x.k==="t:Alagón")||rest.find(x=>x.k==="t:Calatayud")||rest[rest.length-1]}
+function plan(sv,o){let best=null;const keys=new Set(o.pl.map(p=>p.k));
+  sv.seq.forEach((x,i)=>{if(!keys.has(x.k))return;const to=target(sv,i,o);if(!to)return;const w=S.walk[x.k],p=o.pl.find(q=>q.k===x.k);
+    const leave=x.t-(w?w.min+S.margin:0);if(!best||leave>best.leave)best={leave,dep:x.t,stop:p,walk:w,to}});return best}
+const placeTown=k=>{const n=k.slice(2);return k[0]==="t"?(TOWN[n]||n):(BUS_PLACES[n]?.town||n)};
+const approx=x=>x.mode==="bus"&&!["b:Pº María Agustín, 2-4","b:Urb. Alameda"].includes(x.p.to.k)?"~":"";
+const arrText=x=>"llega a "+placeTown(x.p.to.k)+" a las "+approx(x)+fmt(x.p.to.t);
+
+function render(){const n=madrid(),now=n.hour*60+n.minute,today=new Date(Date.UTC(n.year,n.month-1,n.day)),o=origin();
+  const from=o.home?"Casetas":(o.near?o.near.town:"");
+  $("route").textContent=o.home?(S.dir==="e"?"Casetas → Zaragoza":"Casetas → Alagón"):from+" → Casetas";
+  const dW=$("dirW"),dE=$("dirE");
+  if(o.home){dW.textContent="Alagón ←";dE.textContent="→ Zaragoza";dW.disabled=dE.disabled=false;dW.style.visibility=dE.style.visibility="";
+    dW.classList.toggle("on",S.dir==="w");dE.classList.toggle("on",S.dir==="e");dW.setAttribute("aria-pressed",S.dir==="w");dE.setAttribute("aria-pressed",S.dir==="e")}
+  else{const east=o.near&&o.near.lng>HOME.lng,a=east?dE:dW,b=east?dW:dE;a.textContent=east?"← "+from:from+" →";a.classList.add("on");a.disabled=true;a.style.visibility="";a.removeAttribute("aria-pressed");
+    b.classList.remove("on");b.style.visibility="hidden";b.disabled=true}
+  let fut=[];for(let a=0;a<4;a++)for(const sv of services(today,a)){const p=plan(sv,o);if(p)fut.push({...sv,p})}
+  fut.sort((a,b)=>a.p.dep-b.p.dep||a.p.to.t-b.p.to.t);
+  const i=fut.findIndex(x=>x.p.leave>=now),h=fut[i];
+  const walking=Object.keys(S.walk).length>0&&!o.far;
+  if(!h){$("heroLab").textContent="Sin datos";$("time").textContent="—";$("line").textContent="";$("arr").textContent="";$("go").textContent="No hay horarios disponibles";$("detail").textContent="";}
+  else{$("heroLab").textContent=walking?"El próximo que puedes coger":"Próximo transporte";
+    $("time").textContent=fmt(h.p.dep);$("line").textContent=h.line;$("arr").textContent=(h.tag?h.tag+", ":"")+arrText(h);
+    if(walking&&h.p.walk){const wait=h.p.leave-now;$("go").textContent=wait<=0?"Sal ya":"Sal en "+dur(wait)+", a las "+fmt(h.p.leave);
+      $("detail").textContent=dur(h.p.walk.min)+(h.p.walk.meth==="route"?"":" (aprox.)")+" a pie hasta "+h.p.stop.s+". Margen: "+S.margin+" min.";}
+    else{$("go").textContent="Dentro de "+dur(h.p.dep-now);$("detail").textContent="Sale de "+h.p.stop.s+". No incluye el tiempo a pie."}}
+  const r=$("run");r.hidden=true;
+  if(walking&&i>0){const m=fut[i-1];if(m.p.dep>=now&&m.p.walk){const t=m.p.dep-now,run=Math.ceil(m.p.walk.min*.6);r.hidden=false;
+    r.textContent=run<=t?`Puedes coger el de las ${fmt(m.p.dep)} (${m.line}) si corres: sale en ${dur(t)}.`:`Ya no llegas al de las ${fmt(m.p.dep)} (${m.line}).`}}
+  const nt=$("note"),msgs=[];const k=iso(today);
+  ALERTS.filter(a=>a.date<=k&&k<=(a.until||a.date)&&a.text).forEach(a=>msgs.push(a.text));
+  if(TRAIN.base&&!TRAIN.trains.length)msgs.push("Ahora no tenemos el horario de los trenes. Solo se muestran los autobuses.");
+  if(o.home&&S.dir==="w")msgs.push("Hacia Alagón solo se muestran trenes: el bus 603 va de Casetas a Zaragoza.");
+  if(o.away&&!S.manual)msgs.push("Estás lejos de Casetas y de la línea: te mostramos los horarios desde Casetas.");
+  if(S.loc==="denied"&&!S.manual)msgs.push("La ubicación está bloqueada. Para activarla, toca el icono a la izquierda de la dirección → Permisos → Ubicación. O elige dónde estás:");
+  if(S.loc==="error"&&!S.manual)msgs.push("No hemos podido saber dónde estás. Comprueba que la ubicación del móvil está activada, o elige dónde estás:");
+  nt.textContent=msgs.join(" ");nt.hidden=!msgs.length;
+  $("places").hidden=!(S.loc==="denied"||S.loc==="error"||S.manual||o.away);
+  for(const b of $("places").querySelectorAll("button"))b.classList.toggle("on",b.dataset.p===S.manual);
+  const b=$("locate");b.textContent=S.loc==="loading"?"Buscando…":"Dónde estoy / Actualizar";b.disabled=S.loc==="loading";
+  const st=h?h.p.stop:o.pl[0];
+  if(st)$("maps").href="https://www.google.com/maps/dir/?api=1"+(S.pos?`&origin=${S.pos.lat},${S.pos.lng}`:"")+`&destination=${st.lat},${st.lng}&travelmode=walking`;
+  $("adif").hidden=!(h&&h.mode==="train")&&!ALERTS.some(x=>x.date<=k&&k<=(x.until||x.date));$("call").hidden=$("adif").hidden;
+  $("list").innerHTML=fut.slice(Math.max(i,0),Math.max(i,0)+6).map((x,j)=>`<li${j===0?' class="cur"':""}><b>${fmt(x.p.dep)}</b><span class="stop">${x.p.stop.s}</span><span class="ln">${x.line}</span><span class="r">${x.tag?x.tag+", ":""}${arrText(x)}</span></li>`).join("");
+  const bd=busDay(today);$("dayt").textContent="Bus hoy: "+(bd==="lab"?"lunes a viernes":bd==="sab"?"sábado":"domingos y festivos");
+  $("margin").value=String(S.margin);
+  showTemp(o);loadTemp(o);
+}
+const tempCache={},tempTry={};
+function tempTown(o){const p=o.home?{town:"Casetas",...HOME}:o.near;return p?{n:p.town,lat:+p.lat.toFixed(2),lng:+p.lng.toFixed(2)}:null}
+function showTemp(o){const t=tempTown(o),el=$("temp"),c=t&&tempCache[t.n];el.hidden=!c;if(c)el.textContent=t.n+" "+c.v+"°"}
+async function loadTemp(o){const t=tempTown(o);if(!t)return;const c=tempCache[t.n];if((c&&Date.now()-c.at<18e5)||Date.now()-(tempTry[t.n]||0)<3e5)return;tempTry[t.n]=Date.now();
+  try{const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${t.lat}&longitude=${t.lng}&current=temperature_2m&timezone=Europe%2FMadrid`);const j=await r.json();const v=j.current&&j.current.temperature_2m;if(typeof v==="number"){tempCache[t.n]={v:Math.round(v),at:Date.now()};showTemp(o)}}catch(e){}}
+async function walkTo(p,s){const m=dist(p,s),approx={min:Math.max(1,Math.ceil(m*1.3/80)),m,meth:"approx"};
+  if(m>FAR_M)return approx;
+  try{const c=new AbortController(),tm=setTimeout(()=>c.abort(),4000);
+    const r=await fetch(`https://routing.openstreetmap.de/routed-foot/route/v1/foot/${p.lng},${p.lat};${s.lng},${s.lat}?overview=false`,{signal:c.signal});clearTimeout(tm);
+    const j=await r.json();const sec=j.routes[0].duration;return{min:Math.max(1,Math.ceil(sec/60)),m,meth:"route"}}catch(e){return approx}}
+
+async function onPos(g){S.pos={lat:g.coords.latitude,lng:g.coords.longitude};S.manual=null;S.loc="ok";const o=origin();S.walk={};if(o.far||o.away){render();return}
+  const ws=await Promise.all(o.pl.map(p=>walkTo(S.pos,p)));S.walk={};o.pl.forEach((p,i)=>S.walk[p.k]=ws[i]);render()}
+function locate(){if(!navigator.geolocation){S.loc="denied";render();return}
+  S.loc="loading";render();
+  const fail=e=>{S.loc=e&&e.code===1?"denied":"error";render()};
+  try{navigator.geolocation.getCurrentPosition(onPos,e=>{if(e.code===1)return fail(e);
+    navigator.geolocation.getCurrentPosition(onPos,fail,{enableHighAccuracy:false,timeout:15000,maximumAge:600000})},{enableHighAccuracy:true,timeout:8000,maximumAge:60000})}catch(e){fail()}}
+const openMode=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone?"app":"web";
+const LOG_URL="";function deviceId(){let id=store.get("device");if(!id&&crypto.randomUUID){id=crypto.randomUUID();store.set("device",id)}return id||""}
+if(LOG_URL)fetch(LOG_URL+"?app=casetas&mode="+openMode,{method:"POST",mode:"cors",keepalive:true,headers:{"Content-Type":"text/plain"},body:deviceId()}).catch(()=>{});
+$("locate").onclick=locate;
+for(const b of [$("dirW"),$("dirE")])b.onclick=()=>{S.dir=b.dataset.d;store.set("dir",S.dir);render()};
+$("places").onclick=e=>{const p=e.target.closest("button")?.dataset.p;if(p){S.manual=p;S.walk={};render();scrollTo({top:0,behavior:"smooth"})}};
+$("margin").onchange=e=>{S.margin=+e.target.value;store.set("margin",S.margin);render()};
+$("infoBtn").onclick=()=>{const i=$("info");i.hidden=!i.hidden;$("infoBtn").setAttribute("aria-expanded",String(!i.hidden));if(!i.hidden)i.scrollIntoView({behavior:"smooth",block:"start"})};
+const es=k=>{const[y,m,d]=k.split("-");return d+"/"+m+"/"+y};
+function showTrainInfo(){if(!TRAIN.updated)return;const[y,m,d]=TRAIN.base.split("-").map(Number),last=new Date(Date.UTC(y,m-1,d)+(TRAIN.days-1)*864e5);
+  $("updated").textContent="Trenes actualizados: "+es(TRAIN.updated);$("trainInfo").textContent=`Trenes: Renfe, actualizados el ${es(TRAIN.updated)}, con horarios hasta el ${es(iso(last))}.`}
+async function loadJSON(u){try{const r=await fetch(u,{cache:"no-cache"});if(r.ok)return await r.json()}catch(e){}return null}
+(async()=>{const t=await loadJSON("trains.json");if(t&&Array.isArray(t.trains)){TRAIN=t;showTrainInfo();render();if(S.pos)onPos({coords:{latitude:S.pos.lat,longitude:S.pos.lng}})}
+  const a=await loadJSON("alerts.json");if(a&&Array.isArray(a.alerts)){ALERTS=a.alerts;render()}})();
+render();setInterval(render,20000);locate();
+if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{})}
+let installEvent=null;
+function setupInstall(){const box=$("install"),text=$("instT"),btn=$("instB"),ua=navigator.userAgent;
+  if(openMode==="app"||store.get("installHidden")){box.hidden=true;return}
+  const ios=/iphone|ipad|ipod/i.test(ua),android=/android/i.test(ua),chromeLike=/chrome|crios|samsungbrowser/i.test(ua)&&!/; wv\)/i.test(ua);
+  if(installEvent){text.textContent="Instálala y ábrela con un toque desde la pantalla de inicio.";btn.hidden=false;box.hidden=false}
+  else if(ios){text.textContent=/crios|fxios/i.test(ua)?"Ábrela en Safari, pulsa Compartir y después «Añadir a pantalla de inicio».":"Pulsa Compartir y después «Añadir a pantalla de inicio».";btn.hidden=true;box.hidden=false}
+  else if(android){text.textContent=chromeLike?"Pulsa los tres puntos (⋮), arriba a la derecha, y después «Instalar aplicación».":"Ábrela en Chrome, pulsa los tres puntos (⋮) y después «Instalar aplicación».";btn.hidden=true;box.hidden=false}
+  else box.hidden=true}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvent=e;setupInstall()});
+window.addEventListener("appinstalled",()=>{store.set("installHidden","1");$("install").hidden=true});
+$("instB").onclick=async()=>{if(!installEvent)return;const ev=installEvent;installEvent=null;ev.prompt();try{const r=await ev.userChoice;if(r.outcome!=="accepted")setupInstall()}catch(e){}};
+$("instX").onclick=()=>{store.set("installHidden","1");$("install").hidden=true};
+setupInstall();
+
+</script>
+</body></html>

@@ -1,0 +1,31 @@
+name: Update train timetable
+on:
+  schedule:
+    - cron: "37 3 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and build timetable
+        run: python3 scripts/update_trains.py
+      - name: Publish changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add trains.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update train timetable"
+          for attempt in 1 2 3; do
+            git push && break
+            [ "$attempt" = 3 ] && exit 1
+            sleep 30
+            git pull --rebase origin main
+          done
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
