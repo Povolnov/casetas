@@ -76,6 +76,13 @@ html.noxmas .xmas,html.noxmas .xmas-t{display:none}
 .dir.on{background:var(--board);border-color:var(--board);color:#ffc247;box-shadow:0 2px 6px rgba(0,0,0,.18)}
 .dir:disabled{cursor:default;opacity:1}
 .duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.duo>.btn{margin:0;padding-inline:8px;font-size:.92rem;line-height:1.2}.duo:not(:has(>a:not([hidden]))){display:none}.nw{white-space:nowrap;display:block}.duo>.btn{flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.news{display:flex;align-items:center;gap:6px;background:var(--board);color:var(--board-fg);border-radius:10px;padding:0 4px 0 12px;min-height:40px;font-size:.92rem;overflow:hidden}
+.news .mq{flex:1;overflow:hidden;white-space:nowrap;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.news .mq span{display:inline-block;padding-left:100%;animation:mq var(--dur,20s) linear infinite}
+.news b{color:var(--amber)}
+.news button{min-height:36px;width:36px;padding:0;background:none;border:0;color:var(--board-fg);font-size:1.2rem;flex:none}
+@keyframes mq{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){.news .mq{white-space:normal}.news .mq span{animation:none;padding:6px 0}}
 </style>
 <main>
   <h1 class="sr" id="route"></h1>
@@ -87,6 +94,7 @@ html.noxmas .xmas,html.noxmas .xmas-t{display:none}
     <div class="detail" id="detail"></div>
     <div class="run" id="run" hidden></div>
   </section>
+  <div class="news" id="news" hidden><div class="mq"><span id="newsT"></span></div><button type="button" id="newsX" aria-label="Cerrar aviso">×</button></div>
   <div class="note" id="note" hidden></div>
   <div class="places" id="places" hidden><button type="button" data-p="home">Estoy en Casetas</button><button type="button" data-p="Zaragoza">Estoy en Zaragoza</button><button type="button" data-p="Utebo">Estoy en Utebo</button><button type="button" data-p="Alagón">Estoy en Alagón</button></div>
   <div class="actions"><button class="primary" id="locate" type="button">Dónde estoy / Actualizar</button><a class="btn ghost" id="maps" target="_blank" rel="noopener">Ruta en Google Maps</a></div>
@@ -138,6 +146,7 @@ const BUS_PLACES={
  "Ctra. Logroño, 7":{s:"Ctra. Logroño, 7",town:"Casetas",lat:41.718004,lng:-1.026663,home:1},
  "Enlace Utebo (vuelta)":{s:"Enlace Utebo",town:"Utebo",lat:41.701556,lng:-0.999603},
  "Av. Navarra, 71":{s:"Av. Navarra, 71 (Delicias)",town:"Zaragoza",lat:41.655361,lng:-0.907355},
+ "Alagón, C/ Mayor":{s:"Alagón, C/ Mayor",town:"Alagón",lat:41.7692772,lng:-1.1195697},
  "Pº María Agustín, 37":{s:"Pº María Agustín, 37",town:"Zaragoza",lat:41.651387,lng:-0.890974}};
 // [stop, minutes after the terminal departure]
 const ROUTE_C=[["Pº María Agustín, 2-4",0],["Pza. del Portillo, 3",2],["Av. Navarra, 12",4],["Av. Navarra, 54",6],["Enlace Utebo (ida)",24],["Ctra. Logroño, 74",36],["Urb. Alameda",40]];
@@ -149,6 +158,9 @@ const BUS={lab:{c:["5:00","5:10","5:20","5:30","5:40","5:50m","6:00","*","7:10",
   z:["6:45","*","8:05","8:30m","8:25","*","9:35","9:55","*","14:05","14:30m","14:25","*","15:35","15:55","*","20:05","20:30m","20:25","*","21:35","21:55","*","24:15"],step:10},
  dom:{c:["7:00","7:30m","8:00","*","8:30","9:10","*","13:10","13:40m","14:10","*","14:40","15:20","*","19:20","19:50m","20:20","*","20:50","21:30","22:00","22:30","23:00"],
   z:["7:45","8:25m","8:45","*","9:15","9:55","*","13:55","14:35m","14:55","*","15:25","16:05","*","20:05","20:45m","21:05","*","21:35","22:15","22:45","23:15","23:45"],step:30}};
+// Búho N61 (CTAZ), de madrugada sábados, domingos y festivos. Official times: Zaragoza 3:30, Casetas 3:44, Pinseque 3:57, Alagón 4:05 / Alagón 4:20, Pinseque 4:27, Casetas 4:37, Zaragoza 4:55. Others are estimated.
+const N61_C=[["Pº María Agustín, 2-4",0],["Av. Navarra, 12",3],["Av. Navarra, 54",5],["Enlace Utebo (ida)",11],["Ctra. Logroño, 74",14],["Pinseque",27],["Alagón, C/ Mayor",35]];
+const N61_Z=[["Alagón, C/ Mayor",0],["Pinseque",7],["Ctra. Logroño, 7",17],["Enlace Utebo (vuelta)",22],["Av. Navarra, 71",32],["Pº María Agustín, 2-4",35]];
 // Trains: replaced at load by trains.json (Renfe Data, updated every night).
 let TRAIN={updated:"",base:"",days:0,stations:{},trains:[]};
 const SHORT={"Zaragoza Delicias":"Delicias","Zaragoza-Portillo":"Portillo","Zaragoza-Goya":"Goya","Zaragoza-Miraflores":"Miraflores","Casetas":"Estación de Casetas","Utebo":"Estación de Utebo","Alagón":"Estación de Alagón"};
@@ -206,6 +218,8 @@ function services(today,add){const d=new Date(today.getTime()+add*864e5),out=[],
   const p=BUS[busDay(d)];
   for(const[dir,route]of[["c",ROUTE_C],["z",ROUTE_Z]])for(const x of expand(p[dir],p.step))
     out.push({mode:"bus",line:x.line,tag,seq:route.map(([st,off])=>({k:"b:"+st,name:st,t:x.t+off+base}))});
+  if(busDay(d)!=="lab")for(const[t0,route]of[["3:30",N61_C],["4:20",N61_Z]])
+    out.push({mode:"bus",line:"Bus N61 (búho)",tag,seq:route.map(([st,off])=>({k:"b:"+st,name:st,t:toMin(t0)+off+base}))});
   return out}
 const isZgz=x=>x.k.startsWith("t:Zaragoza")||(x.k[0]==="b"&&BUS_PLACES[x.k.slice(2)]?.town==="Zaragoza");
 // Where a trip ends for the reader: Casetas when coming home, else Zaragoza or the west.
@@ -213,13 +227,13 @@ function target(sv,from,o){const rest=sv.seq.slice(from+1);
   if(!o.home)return rest.find(x=>x.k==="t:"+HOME_ST||(x.k[0]==="b"&&BUS_PLACES[x.k.slice(2)]?.home));
   if(S.dir==="e"){if(!rest.some(isZgz))return null;
     return rest.find(x=>x.k==="t:Zaragoza Delicias")||rest.find(x=>x.k==="t:Zaragoza-Portillo")||rest.find(x=>x.k==="b:Av. Navarra, 71")||rest.find(isZgz)}
-  if(sv.mode!=="train"||!rest.length||rest.some(isZgz)||rest[0].k==="t:Utebo")return null;
-  return rest.find(x=>x.k==="t:Alagón")||rest.find(x=>x.k==="t:Calatayud")||rest[rest.length-1]}
+  if(!rest.length||rest.some(isZgz)||(sv.mode==="train"?rest[0].k==="t:Utebo":!sv.line.includes("N61")))return null;
+  return rest.find(x=>x.k==="t:Alagón"||x.k==="b:Alagón, C/ Mayor")||rest.find(x=>x.k==="t:Calatayud")||rest[rest.length-1]}
 function plan(sv,o){let best=null;const keys=new Set(o.pl.map(p=>p.k));
   sv.seq.forEach((x,i)=>{if(!keys.has(x.k))return;const to=target(sv,i,o);if(!to)return;const w=S.walk[x.k],p=o.pl.find(q=>q.k===x.k);
     const leave=x.t-(w?w.min+S.margin:0);if(!best||leave>best.leave)best={leave,dep:x.t,stop:p,walk:w,to}});return best}
 const placeTown=k=>{const n=k.slice(2);return k[0]==="t"?(TOWN[n]||n):(BUS_PLACES[n]?.town||n)};
-const approx=x=>x.mode==="bus"&&!["b:Pº María Agustín, 2-4","b:Urb. Alameda"].includes(x.p.to.k)?"~":"";
+const approx=x=>x.mode==="bus"&&!(["b:Pº María Agustín, 2-4","b:Urb. Alameda"].includes(x.p.to.k)||(x.line.includes("N61")&&["b:Ctra. Logroño, 74","b:Ctra. Logroño, 7","b:Alagón, C/ Mayor"].includes(x.p.to.k)))?"~":"";
 const arrText=x=>"llega a "+placeTown(x.p.to.k)+" a las "+approx(x)+fmt(x.p.to.t);
 
 function render(){const n=madrid(),now=n.hour*60+n.minute,today=new Date(Date.UTC(n.year,n.month-1,n.day)),o=origin();
@@ -246,7 +260,7 @@ function render(){const n=madrid(),now=n.hour*60+n.minute,today=new Date(Date.UT
   const nt=$("note"),msgs=[];const k=iso(today);
   ALERTS.filter(a=>a.date<=k&&k<=(a.until||a.date)&&a.text).forEach(a=>msgs.push(a.text));
   if(TRAIN.base&&!TRAIN.trains.length)msgs.push("Ahora no tenemos el horario de los trenes. Solo se muestran los autobuses.");
-  if(o.home&&S.dir==="w")msgs.push("Hacia Alagón solo se muestran trenes: el bus 603 va de Casetas a Zaragoza.");
+  if(o.home&&S.dir==="w")msgs.push("Hacia Alagón: trenes y, de madrugada (sábados, domingos y festivos), el búho N61. El bus 603 va solo de Casetas a Zaragoza.");
   if(o.away&&!S.manual)msgs.push("Estás lejos de Casetas y de la línea: te mostramos los horarios desde Casetas.");
   if(S.loc==="denied"&&!S.manual)msgs.push("La ubicación está bloqueada. Para activarla, toca el icono a la izquierda de la dirección → Permisos → Ubicación. O elige dónde estás:");
   if(S.loc==="error"&&!S.manual)msgs.push("No hemos podido saber dónde estás. Comprueba que la ubicación del móvil está activada, o elige dónde estás:");
@@ -298,6 +312,12 @@ function showTrainInfo(){if(!TRAIN.updated)return;const[y,m,d]=TRAIN.base.split(
 async function loadJSON(u){try{const r=await fetch(u,{cache:"no-cache"});if(r.ok)return await r.json()}catch(e){}return null}
 (async()=>{const t=await loadJSON("trains.json");if(t&&Array.isArray(t.trains)){TRAIN=t;showTrainInfo();render();if(S.pos)onPos({coords:{latitude:S.pos.lat,longitude:S.pos.lng}})}
   const a=await loadJSON("alerts.json");if(a&&Array.isArray(a.alerts)){ALERTS=a.alerts;render()}})();
+let NEWS=[];
+function showNews(){const el=$("news");if(!el)return;const n0=madrid(),k=`${n0.year}-${String(n0.month).padStart(2,"0")}-${String(n0.day).padStart(2,"0")}`;
+  const it=NEWS.find(n=>n.id&&n.text&&n.date<=k&&k<=(n.until||n.date)&&store.get("news_"+n.id)!=="1");
+  el.hidden=!it;if(!it)return;el.dataset.id=it.id;const t=$("newsT");t.innerHTML="<b>Novedad:</b> "+it.text.replace(/</g,"&lt;");t.parentNode.style.setProperty("--dur",Math.max(14,Math.round(it.text.length*.2))+"s")}
+$("newsX").onclick=()=>{store.set("news_"+$("news").dataset.id,"1");showNews()};
+loadJSON("news.json").then(j=>{if(j&&Array.isArray(j.news)){NEWS=j.news;showNews()}});
 render();setInterval(render,20000);locate();
 if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{})}
 let installEvent=null;
